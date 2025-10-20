@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Mahlzeit am Meer - Cuxhaven-Duhnen</title>
+	<meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<meta http-equiv="x-ua-compatible" content="IE=edge" />
+	<link href="infospot/infospot.css" rel="stylesheet" />
+	<style>
+		@-ms-viewport { width: device-width; }
+		@media only screen and (min-device-width: 800px) { html { overflow:hidden; } }
+		html { height:100%; }
+		body { height:100%; overflow:hidden; margin:0; padding:0; font-family:Arial, Helvetica, sans-serif; 
+			font-size:16px; color:#FFFFFF; background-color:#000000; }
+	</style>
+    <meta property="og:title" content="Virtueller Rundgang Mahlzeit am Meer - Cuxhaven-Duhnen" />
+	<meta property="og:site_name" content="Virtueller Rundgang Mahlzeit am Meer - Cuxhaven-Duhnen, erstellt von panoxl.de"/>
+    <meta property="og:url" ontent="https://www.mahlzeit-am-meer.de/" />
+    <meta property="og:description" content="Ein Virtueller Rundgang Mahlzeit am Meer, erstellt von www.panoxl.de" />
+    <meta property="og:image" content="https://www.mahlzeit-am-meer.de/" />
+</head>
+<body>
+
+<script src="tour.js"></script>
+<script src="cyvt.js"></script>
+
+<div id="pano" style="width:100%;height:100%;">
+	<noscript>
+		<table style="width:100%;height:100%;">
+			<tr style="valign:middle;">
+				<td><div style="text-align:center;">Ein Virtueller Rundgang Mahlzeit am Meer, erstellt von www.panoxl.de
+                <br>
+				<br>
+				Für die Wiedergabe muss Javascript im Browser aktiviert sein.<br/><br/></div></td>
+			</tr>
+		</table>
+	</noscript>
+	<script>
+	embedpano({swf:"tour.swf", xml:"cyvt.xml", target:"pano", html5:"prefer", passQueryParameters:true});
+	</script>
+</div>
+
+<img src="infospot/close.png" id="infospot_close" onclick="hidelayer()">
+<div id="infospot_preview"></div>
+
+<script>
+var click_track = { 'time': '', 'name':'' };
+
+
+/**
+ * Ignore double click within 500 ms.
+ * @param string name
+ * @param string prefix (ivw_|pc_|pp_)
+ * @return boolean
+ */
+function prevent_doubleclick(name) {
+  var ts = new Date().getTime();
+
+  if (click_track['name'] === name && ts - click_track['time'] < 500) {
+	return true;
+  }
+
+  click_track['time'] = ts;
+  click_track['name'] = name;
+
+  return false;
+}
+
+
+// aufruf aus krpano 
+function gatrack(name) {
+
+  if (prevent_doubleclick(name)) {
+		return;
+  }
+
+  ga('send', 'pageview', name);
+}
+
+
+// Google Tracking Code
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-67xxxxx', 'auto');
+ga('send', 'pageview');
+</script>
+
+</body>
+</html>

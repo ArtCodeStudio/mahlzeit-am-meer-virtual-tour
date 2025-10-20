@@ -1,0 +1,20 @@
+<krpano>
+<scene name="scene_am0274" title="am0274" thumburl="panos/am0274.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am0274.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am0274.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am0274.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am0274.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am0274.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+</scene>
+</krpano>

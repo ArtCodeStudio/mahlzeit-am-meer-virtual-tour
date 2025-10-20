@@ -1,0 +1,150 @@
+/* Font definition */
+@font-face {
+	font-family: "Niveau";
+	src: url("fonts/HVD Fonts - NiveauGroteskLight.otf");
+}
+
+@font-face {
+	font-family: "Niveau";
+	src: url("fonts/HVD Fonts - NiveauGroteskMedium.otf");
+}
+
+@font-face {
+	font-family: "Niveau";
+	font-weight: bold;
+	src: url("fonts/HVD Fonts - NiveauGroteskBold.otf");
+}
+
+@font-face {
+	font-family: "Niveau";
+	font-style: italic;
+	src: url("fonts/HVD Fonts - NiveauGroteskMedium-Italic.otf");
+}
+
+#upload_preview_img img {
+  max-height:160px !important; width:auto; border:1px solid black;
+}
+
+#upload_preview_link {
+  margin-left:4ch;
+}
+
+
+
+/* Infospot */
+#infospot_bg {
+	position:fixed;
+	display:none;
+	margin:0;
+	padding:0;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+	background-color:black;
+	opacity:0.6;
+	z-index:100;
+}
+
+#infospot_close {
+	display:none;
+	background-color: #000000 !important; /* FF BUG: invisible without background color */
+	position:fixed;
+	z-index:120;
+	border:0 !important;
+}
+
+#infospot_preview {
+	display:none;
+	position:fixed;
+	left:50%;
+	top:50%;
+	z-index:110;
+	transform: translate(-50%, -50%);
+	padding:12px;
+	border:5px solid #000000 !important;
+	background-color:rgba(231,88,00, 1) !important ;
+	color:#ffffff !important;
+	font-size:18px !important;
+	font-family: "Niveau" !important;
+}
+
+#infospot_preview a {
+	color:#000000 !important;
+	text-decoration: underline !important;
+}
+
+
+/* Infospot Type */
+#infospot_preview.html {
+	width:70%;
+}
+
+#infospot_preview.link {
+}
+
+#infospot_preview.text pre {
+	padding:0;
+	margin:0;
+	width:100%;
+	height:100%;
+	color:white;
+	font-size:18px !important;
+	font-family: "Niveau" !important;
+	background-color:transparent;
+	border:0;
+}
+
+#infospot_preview.download {
+}
+
+#infospot_preview.pdf {
+}
+
+#infospot_preview.image {
+	padding:0 !important;
+	display:inline-block;
+	margin:0 auto;
+	background-color:black !important;
+}
+
+#infospot_preview.image img {
+	display:block;
+	height:80%;
+}
+
+#infospot_preview.video {
+	padding:0 !important;
+	background-color:black !important;
+}
+
+#infospot_preview.video video {
+	width:800px;
+}
+
+
+#infospot_preview.image_desc pre {
+        padding:0;
+        margin:0;
+        width:100%;
+        height:100%;
+        color:white;
+        font-size:18px !important;
+        font-family: "Niveau" !important;
+        background-color:transparent;
+        border:0;
+}
+
+#infospot_preview.image_desc h3 {
+	margin-top:0; padding-top:0; text-align:center; width:90%; margin-left:5%;
+}
+
+#infospot_preview.image_desc img {
+	width: 100%; border:1px solid black;
+}
+
+#infospot_preview.image_desc p {
+	width: 90%; margin-left:5%; text-align:center;
+}
+
+

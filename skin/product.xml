@@ -1,0 +1,57 @@
+<krpano>
+
+<events name="product_events" onnewpano="close_product()" keep="true" />
+
+<style name="product"
+	url="%SWFPATH%/skin/tag.png"
+	width="40" height="prop"
+	onover="tween(rotate, -10, 0.1);"
+	onout="tween(rotate, 0, 0.1);"
+	edge="topleft"
+	onclick="open_product(get(pimg), get(plink), get(pname), get(pid));"
+	
+/>
+
+
+<layer name="product_wrapper" type="container" autoalpha="true" keep="true" alpha="0" visible="false" width="100%" height="100%" align="center" ox="-76" oy="-30">
+	<layer name="product" keep="true" align="center" visible="false" alpha="0" autoalpha="true" maskchildren="false" handcursor="false">
+		<layer name="product_close_icon" autoalpha="true" url="%SWFPATH%/skin/close.png" crop="0|0|30|30" align="righttop" x="4" y="4" onclick="close_product()" zorder="3" keep="true"/>
+<!--
+		<layer name="link_wrapper" type="container" autoalpha="true" keep="true" alpha="1" visible="true" width="372" height="50" align="bottomleft" 
+			bgcolor="0xffffff" bgalpha="0" oy="-12" ox="12">
+			<layer name="store_link" url="%SWFPATH%/skin/store_link.png" crop="0|28|268|28" onovercrop="0|0|268|28" 
+				onclick="js(ga_pc(get(pid),get(pname)));openurl(get(plink), _blank)" keep="true" align="left" ox="15" oy="0" />
+		</layer>
+-->
+	</layer> 
+</layer>
+  
+<action name="open_product">
+js(ivw_pp(%4,%3));
+set(opened, true);
+txtadd(filename, '%SWFPATH%/infospot/', %1);
+copy(layer[product].url, filename);
+<!--
+set(layer[store_link].plink, %2);
+set(layer[store_link].pname, %3);
+set(layer[store_link].pid, %4);
+-->
+delayedcall(0.05, tween(layer[product_wrapper].alpha, 1)); 
+delayedcall(0.05, tween(layer[product].alpha, 1)); 
+</action>
+
+<action name="toggle_product">
+if(opened == true, 
+	close_product(); 
+, 
+	open_product(%1, %2); 
+);
+</action>
+
+<action name="close_product">
+set(opened, false); 
+delayedcall(0.05, tween(layer[product_wrapper].alpha, 0));
+delayedcall(0.05, tween(layer[product].alpha, 0));
+</action>
+  
+</krpano>

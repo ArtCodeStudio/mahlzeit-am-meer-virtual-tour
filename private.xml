@@ -1,0 +1,962 @@
+﻿<krpano title="Virtual Tour" onstart="startup();">
+
+
+<include url="plugins/showtext.xml" />
+
+<action name="startup">
+if(startscene === null, set(startscene,scene_am2143));
+load_scene(get(startscene), null, MERGE);
+</action>
+
+<action name="load_scene">
+set(hotspot[nadirlogo].visible, true);
+if (%1 == 'scene_co10476', set(hotspot[nadirlogo].visible, false));
+if (%1 == 'scene_co10479', set(hotspot[nadirlogo].visible, false));
+if (%1 == 'scene_co10486', set(hotspot[nadirlogo].visible, false));
+if (%1 == 'scene_co10492', set(hotspot[nadirlogo].visible, false));
+loadscene(%1, %2, %3);
+</action>
+
+<!-- enable animation: onloaded="hotspot_animate();" -->
+<style name="hotspot_style" url="img/hotspot.png" crop="0|0|400|400"  onovercrop="0|400|400|400" zoom="false"
+	altonloaded="if(isphone, mul(scale,2)); onloaded();" width="100" height="prop"  />
+
+<style name="hotspot_style_mobile" url="img/hotspot.png" crop="0|0|400|400"  onovercrop="0|400|400|400" zoom="false"
+	altonloaded="if(isphone, mul(scale,2)); onloaded();" width="65" height="prop" />
+	
+<action name="hotspot_animate">
+inc(frame,1,get(frames),0);
+mul(ypos,frame,frameheight);
+txtadd(crop,'0|',get(ypos),'|',get(framewidth),'|',get(frameheight));
+delayedcall(0.8, hotspot_animate());
+</action>
+
+<action name="toggle_animated_area">
+if (hotspot[%1].alpha == 0,
+  set(url,'img/button-on.png');
+  tween(hotspot[%1].alpha, 1, 0.5);
+,
+  tween(hotspot[%1].alpha, 0, 0.3);
+  set(url,'img/button-off.png');
+ 
+  
+);
+</action>
+
+<textstyle name="infotext"  background="true" fontsize="14.0" font="Arial" textcolor="0xFFFFFF" backgroundcolor="0x3b5998" padding="10" yoffset="-30" border="false" />
+<!--
+<hotspot name="nadirlogo" keep="true" url="img/nadir.png" ath="0" atv="90" distorted="true" scale="0.8" rotate="0.0" 
+	rotatewithview="false" onclick="openurl(http://www.camping-orsingen.de,_blank)" />
+-->
+<textstyle name="shoptext"  
+		 background="true" fontsize="16.0" font="Verdana,Helvetica" textcolor="0xFFFFFF" width="400" yoffset="-40" 
+      
+		 backgroundcolor="0x3b5998"
+         backgroundalpha="1.0"
+		 padding="10"
+		 border="true"
+		 bordercolor="0xffffff"
+		 borderwidth="4"
+	/>
+
+
+
+<style name="infospot_style" url="img/infospot.png" zoom="false" width="90" height="prop" />
+
+<textstyle name="planstyle"  background="false" fontsize="16.0" font="Arial" textcolor="0x000000" yoffset="-10" border="false" />
+<style name="planspot_style" handcursor="false" /> 
+
+<action name="calc_pos_from_hfov_yaw_pitch_roll">
+  div(hfov,%1,57.295779);
+  div(yaw,%2,-57.295779);
+  div(pitch,%3,57.295779);
+  div(roll,%4,-57.295779);
+  mul(hfov,0.5);Math.tan(hfov);mul(width,hfov,1000);set(height,'prop');
+  Math.cos(ch,yaw);Math.sin(sh,yaw);
+  Math.cos(ca,pitch);Math.sin(sa,pitch);
+  Math.cos(cb,roll);Math.sin(sb,roll);
+  mul(m0,ca,ch);
+  mul(tmp,cb,sa);mul(tmp,ch);mul(tmp2,sb,sh);add(m3,tmp,tmp2);
+  mul(m4,cb,ca);
+  mul(tmp,cb,sa);mul(tmp,sh);mul(tmp2,sb,ch);sub(m5n,tmp,tmp2);mul(m5n,-1);
+  mul(tmp,sb,sa);mul(tmp,ch);mul(tmp2,cb,sh);sub(m6n,tmp,tmp2);mul(m6n,-1);
+  Math.atan2(yaw,m6n,m0);
+  Math.atan2(roll,m5n,m4);
+  Math.asin(pitch,m3);
+  mul(ath,yaw,57.295779);
+  mul(atv,pitch,57.295779);
+  mul(rotate,roll,57.295779);
+</action>
+<action name="toggle_ani">
+ if(plugin[%1].alpha == 0,
+    js(gatrack('Animation einblenden %1'));
+	tween(alpha,1,0.5);
+,
+	tween(alpha,0,0.3);
+	js(gatrack('Animation ausblenden %1'));
+	
+);
+ 
+	   
+</action>
+<action name="toggle_grundriss">
+
+if(plugin[grundriss].x == 0,
+	tween(plugin[grundriss].x,-1000);
+		,
+	tween(plugin[grundriss].x,0);
+	
+);
+</action>
+
+ <action name="rotate-on">
+      set(plugin[roton].visible, true);
+	  set(plugin[roton-hi].visible, true);
+      set(plugin[rotoff].visible, false);
+	  set(plugin[rotoff-hi].visible, false);
+      switch(autorotate.enabled)
+   </action>
+   
+   <action name="rotate-off">
+      set(plugin[rotoff].visible, true);
+	  set(plugin[rotoff-hi].visible, true);
+      set(plugin[roton].visible, false); 
+	  set(plugin[roton-hi].visible, false);   
+      switch(autorotate.enabled)
+   </action>
+   
+
+<plugin name="grundriss" devices="all" children="true" url="plan/grundriss.png" keep="true" align="leftmiddle"  x="-1000" height="707" width="1000"
+	visible="true" alpha="1" zorder="7" handcursor="false" />
+
+<!-- Grundriss -->
+    <!--
+<plugin name="button_grundriss" devices="all" url="img/button-grundriss.png" align="bottomleft" keep="true" height="120" x="20" y="10"  width="prop" zorder="7" scale="0.6" onclick="toggle_grundriss();" onover="tween(alpha,0,0.2);" onout="tween(alpha,1,0.2);" />
+<plugin name="button_grundriss-hi" devices="all" url="img/button-grundriss-hi.png" align="bottomleft"  keep="true" x="20" y="10" height="120" width="prop" zorder="6" scale="0.6" onclick="toggle_grundriss();" />
+-->
+
+
+
+
+<plugin name="logo" devices="all" url="img/logo.png" keep="true" align="topleft"  x="0" y="20" width="400" height="prop"
+	visible="true" alpha="1" zorder="7" handcursor="false" onclick="loadscene('scene_am2143',view.hlookat=220&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine));" />
+
+
+<plugin name="breakfast" devices="all" url="img/breakfast.png" keep="true" align="topright"  x="0" y="20" width="400" height="prop"
+	visible="true" alpha="1" zorder="7" handcursor="false" onclick="openurl(https://panorama.panoxl.de/amMeer/?startscene=scene_am2300,_self)" />
+
+
+
+
+<plugin name="fullscreenbt" devices="Desktop" url="img/fullscreen.png" align="bottomright" zorder="11" keep="true" x="20" y="10" onclick="js(gatrack('Vollbild Wechsel'));switch(fullscreen);" onover="tween(alpha,0,0.2);" onout="tween(alpha,1,0.2);" />
+<plugin name="fullscreenbt-hi" devices="Desktop" url="img/fullscreen-hi.png" align="bottomright" zorder="10" keep="true" x="20" y="10" onclick="js(gatrack('Vollbild Wechsel'));switch(fullscreen);" />
+
+<!-- Rotation -->		
+<plugin name="roton" devices="all" 
+	url="img/button-rotate.png" align="bottom" keep="true" x="0" y="42" zorder="7" scale="0.8" onclick="js(gatrack('Rotation Off'));rotate-off();"  
+	onover="tween(alpha,0,0.2);" onout="tween(alpha,1,2);" visible="false"/>
+<plugin name="roton-hi" devices="all" 
+	url="img/button-rotate-hi.png" align="bottom" keep="true" x="0" y="42" zorder="6" scale="0.8" onclick="js(gatrack('Rotation Off'));rotate-off();" visible="false" />
+
+<plugin name="rotoff" devices="all" 
+	url="img/button-rotate-pause.png" align="bottom" keep="true" x="0" y="42" zorder="7" scale="0.8" onclick="js(gatrack('Rotation On'));rotate-on();"  
+	onover="tween(alpha,0,0.2);" onout="tween(alpha,1,2);" visible="true" />
+<plugin name="rotoff-hi" devices="all" 
+	url="img/button-rotate-pause-hi.png" align="bottom" keep="true" x="0" y="42" zorder="6" scale="0.8" onclick="js(gatrack('Rotation On'));rotate-on()" visible="true" />
+
+
+<!-- left -->		
+<plugin name="button-left" devices="all" 
+	url="img/button-left.png" align="bottom" keep="true" x="-100" y="35" zorder="7" scale="0.6" ondown="js(gatrack('View left'));set(hlookat_moveforce,-1);" onup="set(hlookat_moveforce,0);"    onover="tween(alpha,0,0.2);" onout="tween(alpha,1,2);" />
+<plugin name="button-left-hi" devices="all" 
+	url="img/button-left-hi.png" align="bottom" keep="true" x="-100" y="35" zorder="6" scale="0.6" ondown="js(gatrack('View left'));set(hlookat_moveforce,-1);" onup="set(hlookat_moveforce,0);" />
+ 
+<!-- right -->		 
+<plugin name="button-right" devices="all" 
+	url="img/button-right.png" align="bottom" keep="true" x="100" y="35" zorder="7" scale="0.6" ondown="js(gatrack('View right'));set(hlookat_moveforce,1);" onup="set(hlookat_moveforce,0);"  
+	onover="tween(alpha,0,0.2);" onout="tween(alpha,1,2);" />
+<plugin name="button-right-hi" devices="all" 
+	url="img/button-right-hi.png" align="bottom" keep="true" x="100" y="35" zorder="6" scale="0.6" ondown="js(gatrack('View right'));set(hlookat_moveforce,1);" onup="set(hlookat_moveforce,0);" />
+
+
+
+<!-- Plus -->
+<plugin name="in" devices="all" url="img/button-plus.png" align="rightcenter" keep="true" x="20" y="-70" zorder="7" scale="0.8"   
+	ondown="js(gatrack('View Zoom in'));set(fov_moveforce,-1);" onup="set(fov_moveforce,0);" onover="tween(alpha,0,0.2);" onout="tween(alpha,1,1);" />
+<plugin name="in-hi" devices="all" url="img/button-plus-hi.png" align="rightcenter" keep="true" x="20" y="-70" zorder="6" scale="0.8"   
+	ondown="js(gatrack('View Zoom in'));set(fov_moveforce,-1);" onup="set(fov_moveforce,0);" />
+
+<!-- Minus -->
+<plugin name="out-hi" devices="all" url="img/button-minus-hi.png" align="rightcenter" keep="true" x="20" y="70" zorder="7" scale="0.8" 
+	ondown="js(gatrack('View Zoom out'));set(fov_moveforce,+1);" onup="set(fov_moveforce,0);" />
+<plugin name="out" devices="all" url="img/button-minus.png" align="rightcenter" keep="true" x="20" y="70" zorder="7" scale="0.8" 
+	ondown="js(gatrack('View Zoom out'));set(fov_moveforce,+1);" onup="set(fov_moveforce,0);" onover="tween(alpha,0,0.2);" onout="tween(alpha,1,1);" />
+
+
+
+
+<krpano>
+<scene name="scene_am0226" title="am0226" thumburl="panos/am0226.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am0226.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am0226.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am0226.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am0226.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am0226.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am0226" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-63" atv="8"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0533'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0533',view.hlookat=7&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am0226" onhover="showtext(am0533,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-63" atv="8" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0533'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0533',view.hlookat=7&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am0274" title="am0274" thumburl="panos/am0274.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am0274.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am0274.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am0274.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am0274.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am0274.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am0274" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="45" atv="3"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0550'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0550',view.hlookat=94&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am0274" onhover="showtext(am0550,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="45" atv="3" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0550'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0550',view.hlookat=94&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am0533" title="am0533" thumburl="panos/am0533.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am0533.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am0533.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am0533.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am0533.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am0533.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am0533" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="171" atv="0"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0226'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0226',view.hlookat=78&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am0533" onhover="showtext(am0226,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="171" atv="0" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0226'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0226',view.hlookat=78&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot2_am0533" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-45" atv="1"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0541'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0541',view.hlookat=-53&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot2_am0533" onhover="showtext(am0541,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-45" atv="1" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0541'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0541',view.hlookat=-53&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot3_am0533" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-110" atv="3"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0550'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0550',view.hlookat=-92&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot3_am0533" onhover="showtext(am0550,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-110" atv="3" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0550'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0550',view.hlookat=-92&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot4_am0533" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="76" atv="0"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2043'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2043',view.hlookat=26&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot4_am0533" onhover="showtext(am2043,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="76" atv="0" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2043'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2043',view.hlookat=26&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am0541" title="am0541" thumburl="panos/am0541.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am0541.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am0541.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am0541.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am0541.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am0541.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am0541" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-164" atv="1"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0550'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0550',view.hlookat=165&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am0541" onhover="showtext(am0550,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-164" atv="1" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0550'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0550',view.hlookat=165&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot2_am0541" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="132" atv="3"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0533'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0533',view.hlookat=129&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot2_am0541" onhover="showtext(am0533,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="132" atv="3" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0533'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0533',view.hlookat=129&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am0550" title="am0550" thumburl="panos/am0550.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am0550.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am0550.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am0550.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am0550.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am0550.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am0550" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="19" atv="4"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0541'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0541',view.hlookat=-11&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am0550" onhover="showtext(am0541,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="19" atv="4" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0541'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0541',view.hlookat=-11&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot2_am0550" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="96" atv="2"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0533'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0533',view.hlookat=80&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot2_am0550" onhover="showtext(am0533,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="96" atv="2" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0533'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0533',view.hlookat=80&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot3_am0550" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-109" atv="7"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0274'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0274',view.hlookat=-139&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot3_am0550" onhover="showtext(am0274,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-109" atv="7" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0274'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0274',view.hlookat=-139&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am1986" title="am1986" thumburl="panos/am1986.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am1986.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am1986.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am1986.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am1986.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am1986.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am1986" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-164" atv="0"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2060'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2060',view.hlookat=14&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am1986" onhover="showtext(am2060,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-164" atv="0" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2060'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2060',view.hlookat=14&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot2_am1986" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="114" atv="0"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2155'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2155',view.hlookat=159&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot2_am1986" onhover="showtext(am2155,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="114" atv="0" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2155'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2155',view.hlookat=159&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am1994" title="am1994" thumburl="panos/am1994.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am1994.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am1994.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am1994.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am1994.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am1994.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am1994" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="87" atv="4"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2043'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2043',view.hlookat=94&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am1994" onhover="showtext(am2043,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="87" atv="4" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2043'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2043',view.hlookat=94&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot2_am1994" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="17" atv="8"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2060'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2060',view.hlookat=-62&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot2_am1994" onhover="showtext(am2060,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="17" atv="8" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2060'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2060',view.hlookat=-62&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot3_am1994" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="61" atv="4"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2143'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2143',view.hlookat=105&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot3_am1994" onhover="showtext(am2143,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="61" atv="4" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2143'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2143',view.hlookat=105&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am2043" title="am2043" thumburl="panos/am2043.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am2043.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am2043.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am2043.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am2043.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am2043.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am2043" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-171" atv="5"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0533'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0533',view.hlookat=-95&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am2043" onhover="showtext(am0533,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-171" atv="5" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am0533'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am0533',view.hlookat=-95&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot2_am2043" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="42" atv="3"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2143'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2143',view.hlookat=34&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot2_am2043" onhover="showtext(am2143,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="42" atv="3" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2143'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2143',view.hlookat=34&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot3_am2043" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-123" atv="6"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2368'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2368',view.hlookat=-168&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot3_am2043" onhover="showtext(am2368,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-123" atv="6" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2368'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2368',view.hlookat=-168&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot4_am2043" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-9" atv="2"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2060'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2060',view.hlookat=-78&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot4_am2043" onhover="showtext(am2060,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-9" atv="2" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2060'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2060',view.hlookat=-78&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot5_am2043" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-74" atv="1"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am1994'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am1994',view.hlookat=-80&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot5_am2043" onhover="showtext(am1994,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-74" atv="1" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am1994'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am1994',view.hlookat=-80&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am2051" title="am2051" thumburl="panos/am2051.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am2051.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am2051.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am2051.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am2051.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am2051.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am2051" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="2" atv="3"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2060'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2060',view.hlookat=-150&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am2051" onhover="showtext(am2060,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="2" atv="3" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2060'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2060',view.hlookat=-150&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot2_am2051" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="85" atv="3"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2070'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2070',view.hlookat=-152&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot2_am2051" onhover="showtext(am2070,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="85" atv="3" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2070'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2070',view.hlookat=-152&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot3_am2051" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-91" atv="1"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2143'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2143',view.hlookat=-137&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot3_am2051" onhover="showtext(am2143,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-91" atv="1" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2143'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2143',view.hlookat=-137&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am2060" title="am2060" thumburl="panos/am2060.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am2060.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am2060.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am2060.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am2060.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am2060.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am2060" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="121" atv="0"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am1994'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am1994',view.hlookat=-171&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am2060" onhover="showtext(am1994,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="121" atv="0" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am1994'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am1994',view.hlookat=-171&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot2_am2060" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="102" atv="4"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2043'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2043',view.hlookat=-168&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot2_am2060" onhover="showtext(am2043,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="102" atv="4" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2043'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2043',view.hlookat=-168&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot3_am2060" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="7" atv="4"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2051'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2051',view.hlookat=175&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot3_am2060" onhover="showtext(am2051,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="7" atv="4" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2051'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2051',view.hlookat=175&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot4_am2060" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="69" atv="2"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2143'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2143',view.hlookat=135&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot4_am2060" onhover="showtext(am2143,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="69" atv="2" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2143'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2143',view.hlookat=135&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot5_am2060" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-155" atv="-1"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am1986'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am1986',view.hlookat=20&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot5_am2060" onhover="showtext(am1986,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-155" atv="-1" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am1986'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am1986',view.hlookat=20&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am2070" title="am2070" thumburl="panos/am2070.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am2070.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am2070.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am2070.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am2070.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am2070.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am2070" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="31" atv="4"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2051'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2051',view.hlookat=-81&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am2070" onhover="showtext(am2051,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="31" atv="4" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2051'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2051',view.hlookat=-81&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot2_am2070" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-74" atv="5"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2080'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2080',view.hlookat=27&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot2_am2070" onhover="showtext(am2080,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-74" atv="5" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2080'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2080',view.hlookat=27&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot3_am2070" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="119" atv="2"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2155'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2155',view.hlookat=51&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot3_am2070" onhover="showtext(am2155,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="119" atv="2" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2155'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2155',view.hlookat=51&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am2080" title="am2080" thumburl="panos/am2080.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am2080.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am2080.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am2080.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am2080.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am2080.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am2080" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-155" atv="5"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2070'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2070',view.hlookat=121&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am2080" onhover="showtext(am2070,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-155" atv="5" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2070'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2070',view.hlookat=121&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot2_am2080" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-54" atv="6"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2134'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2134',view.hlookat=119&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot2_am2080" onhover="showtext(am2134,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-54" atv="6" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2134'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2134',view.hlookat=119&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am2134" title="am2134" thumburl="panos/am2134.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am2134.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am2134.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am2134.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am2134.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am2134.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am2134" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-76" atv="5"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2080'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2080',view.hlookat=105&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am2134" onhover="showtext(am2080,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-76" atv="5" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2080'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2080',view.hlookat=105&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am2143" title="am2143" thumburl="panos/am2143.tiles/thumb.jpg">
+<view hlookat="220" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am2143.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am2143.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am2143.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am2143.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am2143.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am2143" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="27" atv="5"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2051'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2051',view.hlookat=84&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am2143" onhover="showtext(am2051,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="27" atv="5" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2051'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2051',view.hlookat=84&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot2_am2143" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-15" atv="2"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2060'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2060',view.hlookat=-92&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot2_am2143" onhover="showtext(am2060,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-15" atv="2" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2060'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2060',view.hlookat=-92&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot3_am2143" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-109" atv="4"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2043'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2043',view.hlookat=-134&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot3_am2143" onhover="showtext(am2043,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-109" atv="4" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2043'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2043',view.hlookat=-134&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am2155" title="am2155" thumburl="panos/am2155.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am2155.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am2155.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am2155.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am2155.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am2155.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am2155" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-23" atv="-1"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am1986'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am1986',view.hlookat=-76&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am2155" onhover="showtext(am1986,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-23" atv="-1" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am1986'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am1986',view.hlookat=-76&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot2_am2155" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-69" atv="4"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2070'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2070',view.hlookat=-69&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot2_am2155" onhover="showtext(am2070,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-69" atv="4" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2070'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2070',view.hlookat=-69&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot3_am2155" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-152" atv="8"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2134'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2134',view.hlookat=-160&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot3_am2155" onhover="showtext(am2134,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-152" atv="8" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2134'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2134',view.hlookat=-160&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am2368" title="am2368" thumburl="panos/am2368.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am2368.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am2368.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am2368.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am2368.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am2368.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am2368" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="2" atv="6"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2043'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2043',view.hlookat=43&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am2368" onhover="showtext(am2043,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="2" atv="6" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2043'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2043',view.hlookat=43&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot2_am2368" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-169" atv="12"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2376'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2376',view.hlookat=98&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot2_am2368" onhover="showtext(am2376,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-169" atv="12" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2376'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2376',view.hlookat=98&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Desktop.or.Tablet" name="hotspot3_am2368" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-145" atv="14"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2385'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2385',view.hlookat=-23&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot3_am2368" onhover="showtext(am2385,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-145" atv="14" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2385'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2385',view.hlookat=-23&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am2376" title="am2376" thumburl="panos/am2376.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am2376.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am2376.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am2376.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am2376.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am2376.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am2376" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="-83" atv="8"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2368'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2368',view.hlookat=3&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am2376" onhover="showtext(am2368,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="-83" atv="8" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2368'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2368',view.hlookat=3&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+<krpano>
+<scene name="scene_am2385" title="am2385" thumburl="panos/am2385.tiles/thumb.jpg">
+<view hlookat="0" vlookat="0" fovtype="MFOV"  fov="120" fovmin="70" fovmax="140" vlookatmin="-90" vlookatmax="90" limitview="range" maxpixelzoom="2" />
+<preview url="panos/am2385.tiles/preview.jpg" />
+<image type="CUBE" multires="true" tilesize="512">
+			<level tiledimagewidth="1910" tiledimageheight="1910">
+				<cube url="panos/am2385.tiles/%s/l3/%v/l3_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="956" tiledimageheight="956">
+				<cube url="panos/am2385.tiles/%s/l2/%v/l2_%s_%v_%h.jpg" />
+			</level>
+			<level tiledimagewidth="512" tiledimageheight="512">
+				<cube url="panos/am2385.tiles/%s/l1/%v/l1_%s_%v_%h.jpg" />
+			</level>
+			<mobile>
+				<cube url="panos/am2385.tiles/mobile_%s.jpg" />
+			</mobile>
+		</image>
+<hotspot devices="Desktop.or.Tablet" name="hotspot1_am2385" onover="tween(alpha,0.1,2,easeOutSine);"
+	onout="tween(alpha,1,0.2);" style="hotspot_style" scale="1" ath="103" atv="9"
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2368'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2368',view.hlookat=93&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+<hotspot devices="Mobile" name="hotspot1_am2385" onhover="showtext(am2368,infotext);" onover="tween(alpha,0,3,easeOutSine);" onout="tween(alpha,1,0.2);"
+	style="hotspot_style_mobile" ath="103" atv="9" scale="0.7" 
+	onclick="js(gatrack('Hotspot Desktop Wechsel zu am2368'));looktohotspot(get(name),100,smooth(360,360,360),true,false);loadscene('scene_am2368',view.hlookat=93&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine)); " />
+
+
+</scene>
+</krpano>
+
+</krpano>
