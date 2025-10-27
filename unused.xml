@@ -138,12 +138,12 @@ if(plugin[grundriss].x == 0,
 
 
 
-<plugin name="logo" devices="all" url="img/logo.png" keep="true" align="topleft"  x="0" y="20" width="400" height="prop"
-	visible="true" alpha="1" zorder="7" handcursor="false" onclick="loadscene('scene_am2143',view.hlookat=220&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine));" />
+<!-- <plugin name="logo" devices="all" url="img/logo.png" keep="true" align="topleft"  x="0" y="20" width="400" height="prop"
+	visible="true" alpha="1" zorder="7" handcursor="false" onclick="loadscene('scene_am2143',view.hlookat=220&amp;view.vlookat=0,MERGE,ZOOMBLEND(1,1.2,easeOutSine));" /> -->
 
 
-<plugin name="breakfast" devices="all" url="img/breakfast.png" keep="true" align="topright"  x="0" y="20" width="400" height="prop"
-	visible="true" alpha="1" zorder="7" handcursor="false" onclick="openurl(https://panorama.panoxl.de/amMeer/?startscene=scene_am2300,_self)" />
+<!-- <plugin name="breakfast" devices="all" url="img/breakfast.png" keep="true" align="topright"  x="0" y="20" width="400" height="prop"
+	visible="true" alpha="1" zorder="7" handcursor="false" onclick="openurl(https://mahlzeit-virtual-tour.artandcode.studio/?startscene=scene_am2300,_self)" /> -->
 
 
 
